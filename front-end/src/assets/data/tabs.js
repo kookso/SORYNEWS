@@ -1,0 +1,15 @@
+export const tabs = [
+  { id: 1, label: "전체", value: "" },
+  { id: 2, label: "경제", value: "경제" },
+  { id: 3, label: "정치", value: "정치" },
+  { id: 4, label: "사회", value: "사회" },
+  { id: 5, label: "국제", value: "국제" },
+  { id: 6, label: "산업", value: "산업" },
+  { id: 7, label: "증권", value: "증권" },
+  { id: 8, label: "부동산", value: "부동산" },
+  { id: 9, label: "문화/연예", value: "문화/연예" },
+  { id: 10, label: "스포츠", value: "스포츠" },
+  { id: 11, label: "게임", value: "게임" },
+  { id: 12, label: "건강", value: "건강" },
+  { id: 13, label: "IT", value: "IT" },
+];

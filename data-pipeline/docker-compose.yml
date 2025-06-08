@@ -1,0 +1,196 @@
+version: "3.8"
+
+services:
+  # PostgreSQL
+  postgres:
+    build: ./postgres 
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ssafyuser
+      POSTGRES_PASSWORD: ssafy
+      POSTGRES_DB: news
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Airflow Webserver
+  airflow-webserver:
+    build: ./airflow
+    container_name: airflow-web
+    command: webserver
+    ports:
+      - "8080:8080"
+    environment:
+      - PYTHONPATH=/opt/shared
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_POOL_PRE_PING=True # PostgreSQL 시작 지연 방지 (Airflow 의존성 처리 강화)
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://ssafyuser:ssafy@postgres:5432/news
+      - PYTHONPATH=/opt/shared
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      #- ./airflow/logs:/opt/airflow/logs   # 로그 기록용 
+      #- ./airflow/plugins:/opt/airflow/plugins  # DAG 외 플러그인 있을 경우 대비
+      - ./shared:/opt/shared
+      - ./spark:/opt/spark
+      - ./flink/jobs:/opt/shared/jobs
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+    depends_on:
+      - postgres
+
+  # Airflow Scheduler
+  airflow-scheduler:
+    build: ./airflow
+    container_name: airflow-scheduler
+    command: scheduler
+    environment:
+      - PYTHONPATH=/opt/shared
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_POOL_PRE_PING=True #  PostgreSQL 시작 지연 방지 (Airflow 의존성 처리 강화)
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://ssafyuser:ssafy@postgres:5432/news
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      #- ./airflow/logs:/opt/airflow/logs   # 로그 기록용
+      #- ./airflow/plugins:/opt/airflow/plugins  # DAG 외 플러그인 있을 경우 대비
+      - ./shared:/opt/shared
+      - ./spark:/opt/spark
+      - ./flink/jobs:/opt/shared/jobs
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - postgres
+
+
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # Flink JobManager
+  flink-jobmanager:
+    build:
+      context: .    # 루트 디렉토리 기준으로 빌드
+      dockerfile: flink/Dockerfile
+    container_name: flink-jobmanager
+    command: jobmanager
+    env_file:
+    - .env  
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./flink/jobs:/app/jobs
+
+  # Flink TaskManager
+  flink-taskmanager:
+    build:
+      context: .    # 루트 디렉토리 기준으로 빌드
+      dockerfile: flink/Dockerfile
+    container_name: flink-taskmanager
+    command: taskmanager
+    env_file:
+    - .env  
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+
+  # HDFS NameNode
+  hadoop-namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+      - HDFS_CONF_dfs_namenode_rpc-address=hadoop-namenode:8020
+    ports:
+      - "9870:9870"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+
+  # HDFS DataNode
+  hadoop-datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-datanode
+    depends_on:
+      - hadoop-namenode
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+
+  # Spark
+  spark:
+    build: ./spark
+    container_name: spark
+    depends_on:
+      - hadoop-namenode
+    env_file:
+      - .env
+    volumes:
+      - ./spark:/opt/spark
+      - ./shared:/opt/shared 
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:8020
+    command: tail -f /dev/null
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+    container_name: elasticsearch
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - network.host=0.0.0.0
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  # Kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.1
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+  esdata:

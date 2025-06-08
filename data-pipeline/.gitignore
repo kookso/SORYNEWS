@@ -1,0 +1,23 @@
+# dotenv
+.env
+
+# Airflow 로그 제외
+Data_pipeline/airflow/logs/
+
+# Python 캐시 및 임시 파일
+__pycache__/
+*.py[cod]
+*.log
+
+# Jupyter 노트북 체크포인트
+.ipynb_checkpoints/
+
+# VSCode 설정 파일 (있다면)
+.vscode/
+
+# 시스템 파일
+.DS_Store
+
+# 기타 임시 파일
+*.swp
+*.bak

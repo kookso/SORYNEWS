@@ -1,0 +1,8 @@
+apache-airflow==2.7.2
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
+feedparser
+beautifulsoup4
+kafka-python
+requests
+elasticsearch==8.13.0
