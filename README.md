@@ -11,7 +11,7 @@ Airflow, Kafka, Flink, Spark, HDFS, PostgreSQL, Elasticsearch, Django, Vue 등�
 
 ## 시스템 아키텍처
 
-![system-architecture](/uploads/5349c460d110889b4903ac2535f33211/SystemArchitecture.png)
+![system-architecture](https://github.com/user-attachments/assets/6b91f417-d4d6-49ad-92b9-50cbc90b0731)
 
 - **뉴스 수집**: Python RSS 크롤러 → Kafka  
 - **전처리 및 저장**: Flink + OpenAI API → PostgreSQL, Elasticsearch, HDFS  
@@ -42,12 +42,12 @@ Airflow, Kafka, Flink, Spark, HDFS, PostgreSQL, Elasticsearch, Django, Vue 등�
 
 | 화면 | 이미지 |
 |------|--------|
-| 뉴스 목록 | ![news-list](/uploads/9e26386891b7e6b769796d1d36a68ae6/news-list.png) |
-| 뉴스 상세 | ![news-detail](/uploads/f02786adf32cdd6cf936ab34d282d037/news-detail.png) |
-| 뉴스 검색 | ![news-search](/uploads/8f25ab4e8700369424f879ef18f80ff3/news-search.png) |
-| 대시보드 | ![dashboard](/uploads/0defcfc929433b0aa1316da00a46e831/dashboard.png) |
-| 로그인 | ![login](/uploads/7d74651a6b0f245186d6801d7023cd4b/login.png) |
-| 회원가입 | ![register](/uploads/48e858a4c7fecad479329c605f7a6264/register.png) |
+| 뉴스 목록 | ![news-list](https://github.com/user-attachments/assets/34cba4dd-2e8f-4af2-80f3-92b03f51f6b5) |
+| 뉴스 상세 | ![news-detail](https://github.com/user-attachments/assets/508febc6-fe55-4969-9eb7-048fbb9b296e) |
+| 뉴스 검색 | ![news-search](https://github.com/user-attachments/assets/ab0f90f5-613e-4b8b-939d-0fb0adb24e99) |
+| 대시보드 | ![dashboard](https://github.com/user-attachments/assets/e7554489-d514-42d8-83a5-1faf166e9196) |
+| 로그인 | ![login](https://github.com/user-attachments/assets/7d73d8c3-45ae-49eb-a31e-9a349fb6b061) |
+| 회원가입 | ![register](https://github.com/user-attachments/assets/605914de-0324-4719-82f9-99c35c7c489d) |
 
 ---
 
