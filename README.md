@@ -2,7 +2,7 @@
 
 ## 프로젝트 소개
 
-<img src="/uploads/0b456236e27b8656a8dc75ed077768b6/sorynews_poster.png" width="800" style="display:block; margin:auto"/>
+<img src="https://github.com/user-attachments/assets/60910a47-46eb-4ddc-ab3e-45aa48911b6c" width="800" style="display:block; margin:auto"/>
 
 **DAESORY NEWS**는 다양한 언론사의 뉴스를 실시간으로 수집하고 전처리하여 사용자가 뉴스에 더 깊이 몰입할 수 있도록 돕는  **맞춤형 뉴스 추천**, **검색 기능**, **분석 대시보드**, **뉴스 기반 챗봇**을 포함한 통합 뉴스 플랫폼입니다.  
 Airflow, Kafka, Flink, Spark, HDFS, PostgreSQL, Elasticsearch, Django, Vue 등의 기술을 활용하여  **뉴스 수집부터 저장, 분석, 검색, 대화형 질의응답 제공**까지 모든 과정을 **자동화**합니다.
